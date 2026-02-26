@@ -26,26 +26,26 @@ export default function TopNav() {
     if (isLoading || !user || pathname === '/login') return null;
 
     return (
-        <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 py-3.5 px-6 flex items-center justify-between shadow-sm">
+        <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 py-3 px-4 sm:py-3.5 sm:px-6 flex items-center justify-between shadow-sm">
             {/* Left: Navigation Links */}
-            <div className="flex gap-8 items-center">
-                <Link href="/songs" className="flex items-center gap-2">
+            <div className="flex items-center gap-4 sm:gap-8 min-w-0">
+                <Link href="/songs" className="flex items-center gap-2 shrink-0">
                     <img src="/icons/Synify.png" alt="Synify" className="w-8 h-8 rounded-lg object-contain" />
-                    <span className="font-black text-sm tracking-tight text-brand-text">Synify</span>
+                    <span className="font-black text-sm tracking-tight text-brand-text hidden sm:inline">Synify</span>
                 </Link>
                 <Link
                     href="/songs"
-                    className={`text-sm font-bold transition-all relative ${pathname === '/songs' ? 'text-brand-primary' : 'text-brand-muted hover:text-brand-text'}`}
+                    className={`text-xs sm:text-sm font-bold transition-all relative ${pathname === '/songs' ? 'text-brand-primary' : 'text-brand-muted hover:text-brand-text'}`}
                 >
                     Discover
-                    {pathname === '/songs' && <span className="absolute -bottom-5 left-0 w-full h-0.5 bg-brand-primary rounded-full"></span>}
+                    {pathname === '/songs' && <span className="absolute -bottom-4 sm:-bottom-5 left-0 w-full h-0.5 bg-brand-primary rounded-full"></span>}
                 </Link>
                 <Link
                     href="/playlists"
-                    className={`text-sm font-bold transition-all relative ${pathname === '/playlists' ? 'text-brand-primary' : 'text-brand-muted hover:text-brand-text'}`}
+                    className={`text-xs sm:text-sm font-bold transition-all relative ${pathname === '/playlists' ? 'text-brand-primary' : 'text-brand-muted hover:text-brand-text'}`}
                 >
                     Playlists
-                    {pathname === '/playlists' && <span className="absolute -bottom-5 left-0 w-full h-0.5 bg-brand-primary rounded-full"></span>}
+                    {pathname === '/playlists' && <span className="absolute -bottom-4 sm:-bottom-5 left-0 w-full h-0.5 bg-brand-primary rounded-full"></span>}
                 </Link>
             </div>
 
@@ -53,7 +53,7 @@ export default function TopNav() {
             <div className="relative" ref={menuRef}>
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="flex items-center gap-2.5 hover:bg-gray-50 p-1.5 pr-2.5 rounded-full transition-colors group"
+                    className="flex items-center gap-2 hover:bg-gray-50 p-1 pr-2 sm:p-1.5 sm:pr-2.5 rounded-full transition-colors group"
                 >
                     <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-gray-200 shrink-0 shadow-inner group-hover:border-brand-primary/30 transition-colors">
                         {user.avatarUrl ? (
@@ -103,7 +103,8 @@ export default function TopNav() {
                                 Admin Panel
                             </Link>
                         )}
-                        <button
+                        <Link
+                            href="/settings"
                             onClick={() => setIsMenuOpen(false)}
                             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-brand-text hover:bg-brand-primary/5 transition-colors"
                         >
@@ -112,7 +113,7 @@ export default function TopNav() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             Pengaturan
-                        </button>
+                        </Link>
 
                         <div className="h-px bg-gray-50 my-1 mx-2" />
 

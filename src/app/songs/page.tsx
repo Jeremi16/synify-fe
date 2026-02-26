@@ -169,6 +169,27 @@ export default function SongsPage() {
         await cacheDownloads([song.id], `Download: ${song.title}`);
     }
 
+    const artistBuckets = search
+        ? (() => {
+            const map = new Map<string, { artist: Song['artists'][0]; songs: Song[]; score: number }>();
+            for (const song of songs) {
+                for (const artist of song.artists || []) {
+                    if (!artist?.id) continue;
+                    const prev = map.get(artist.id);
+                    const nextScore = (prev?.score || 0) + (song.playCount || 0) + 1;
+                    map.set(artist.id, {
+                        artist,
+                        songs: prev ? [...prev.songs, song] : [song],
+                        score: nextScore,
+                    });
+                }
+            }
+            return Array.from(map.values()).sort((a, b) => b.score - a.score);
+        })()
+        : [];
+
+    const topArtist = artistBuckets[0]?.artist || null;
+
     const moodMixes = [
         {
             mood: 'Relax',
@@ -202,19 +223,19 @@ export default function SongsPage() {
     }
 
     return (
-        <div className="px-6 pb-20 max-w-2xl mx-auto min-h-screen">
+        <div className="px-4 sm:px-6 pb-28 sm:pb-24 max-w-2xl mx-auto min-h-screen">
             <DownloadSessionModal
                 state={downloadState}
                 onClose={() => setDownloadState((prev) => ({ ...prev, isOpen: false }))}
             />
             {/* Discover Header - Simple welcome */}
-            <header className="py-8">
-                <h1 className="font-extrabold text-4xl text-brand-text tracking-tight mb-1">Discover</h1>
+            <header className="py-6 sm:py-8">
+                <h1 className="font-extrabold text-3xl sm:text-4xl text-brand-text tracking-tight mb-1">Discover</h1>
                 <p className="text-brand-muted text-sm font-medium">Temukan musik favoritmu di sini.</p>
                 <div className="mt-4">
                     <button
                         onClick={downloadForTonight}
-                        className="text-[11px] font-black uppercase tracking-widest bg-brand-primary text-white px-4 py-2 rounded-full shadow-sm hover:shadow-md transition"
+                        className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest bg-brand-primary text-white px-4 py-2 rounded-full shadow-sm hover:shadow-md transition"
                     >
                         Download for Tonight
                     </button>
@@ -229,7 +250,7 @@ export default function SongsPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full bg-white text-brand-text placeholder-brand-muted
-                     rounded-2xl px-5 py-4 pr-12 text-sm outline-none shadow-sm
+                     rounded-2xl px-4 sm:px-5 py-3.5 sm:py-4 pr-12 text-sm outline-none shadow-sm
                      focus:ring-2 focus:ring-brand-accent transition border border-gray-100 font-medium"
                 />
                 <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-primary">
@@ -255,21 +276,49 @@ export default function SongsPage() {
             {!isLoading && !error && (
                 <>
                     {search ? (
-                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <h2 className="font-bold text-xl mb-4 text-brand-text">Hasil untuk "{search}"</h2>
                             {songs.length === 0 ? (
                                 <div className="text-brand-muted text-center py-10">Tidak ada lagu ditemukan.</div>
                             ) : (
-                                <div className="space-y-1">
-                                    {songs.map((song) => (
-                                        <SongCard
-                                            key={song.id}
-                                            song={song}
-                                            onPlay={() => play(song, songs)}
-                                            onClick={() => router.push(`/songs/${song.id}`)}
-                                            onDownload={() => downloadSong(song)}
-                                        />
-                                    ))}
+                                <div className="space-y-10">
+                                    {topArtist && (
+                                        <section>
+                                            <div
+                                                onClick={() => router.push(`/artists/${topArtist.id}`)}
+                                                className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm cursor-pointer hover:shadow-md transition text-center"
+                                            >
+                                                <div className="mx-auto w-28 h-28 rounded-full bg-gray-100 overflow-hidden">
+                                                    {topArtist.avatarUrl ? (
+                                                        <img src={topArtist.avatarUrl} alt={topArtist.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-brand-muted font-black text-3xl">
+                                                            {topArtist.name[0]?.toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p className="mt-4 text-2xl font-black text-brand-text truncate">{topArtist.name}</p>
+                                                <p className="text-xs font-black uppercase tracking-widest text-brand-muted">Artist</p>
+                                            </div>
+                                        </section>
+                                    )}
+
+                                    <section>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-lg font-black text-brand-text">Lagu</h3>
+                                        </div>
+                                        <div className="space-y-1">
+                                            {songs.map((song) => (
+                                                <SongCard
+                                                    key={song.id}
+                                                    song={song}
+                                                    onPlay={() => play(song, songs)}
+                                                    onClick={() => router.push(`/songs/${song.id}`)}
+                                                    onDownload={() => downloadSong(song)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </section>
                                 </div>
                             )}
                         </section>
@@ -280,7 +329,7 @@ export default function SongsPage() {
                             {/* Rekomendasi / Terbaru - NOW AT TOP */}
                             <section>
                                 <div className="flex items-center justify-between mb-5">
-                                    <h2 className="font-black text-3xl text-brand-text tracking-tight">Rekomendasi</h2>
+                                    <h2 className="font-black text-2xl sm:text-3xl text-brand-text tracking-tight">Rekomendasi</h2>
                                     <button
                                         onClick={() => router.push('/songs/list/latest')}
                                         className="text-[10px] font-black uppercase tracking-widest text-brand-muted hover:text-brand-primary transition-colors"
@@ -288,14 +337,14 @@ export default function SongsPage() {
                                         Lihat Semua
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-2 gap-5">
-                                    {latestSongs.slice(0, 4).map((song) => (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                                    {latestSongs.slice(0, 2).map((song) => (
                                         <div
                                             key={song.id}
                                             onClick={() => play(song, latestSongs)}
-                                            className="bg-white p-4 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group"
+                                            className="bg-white p-3 sm:p-4 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group sm:hidden"
                                         >
-                                            <div className="aspect-square rounded-[1.8rem] overflow-hidden mb-4 relative shadow-inner">
+                                            <div className="aspect-square rounded-[1.5rem] sm:rounded-[1.8rem] overflow-hidden mb-4 relative shadow-inner">
                                                 <img
                                                     src={song.coverUrl || 'https://placehold.co/300x300?text=No+Cover'}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -303,7 +352,33 @@ export default function SongsPage() {
                                                 />
                                                 <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                                                     <div className="w-12 h-12 bg-white text-brand-primary rounded-full flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                                                        <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="px-1">
+                                                <h3 className="font-black text-base text-brand-text truncate leading-tight mb-0.5">{song.title}</h3>
+                                                <p className="text-[11px] text-brand-muted font-bold tracking-tight truncate">
+                                                    {song.artists.map(a => a.name).join(', ')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {latestSongs.slice(0, 4).map((song) => (
+                                        <div
+                                            key={song.id}
+                                            onClick={() => play(song, latestSongs)}
+                                            className="bg-white p-3 sm:p-4 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group hidden sm:block"
+                                        >
+                                            <div className="aspect-square rounded-[1.5rem] sm:rounded-[1.8rem] overflow-hidden mb-4 relative shadow-inner">
+                                                <img
+                                                    src={song.coverUrl || 'https://placehold.co/300x300?text=No+Cover'}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    alt={song.title}
+                                                />
+                                                <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                                    <div className="w-12 h-12 bg-white text-brand-primary rounded-full flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                                     </div>
                                                 </div>
                                             </div>
@@ -321,7 +396,7 @@ export default function SongsPage() {
                             {/* Top Play - NOW BELOW */}
                             <section>
                                 <div className="flex items-center justify-between mb-4 mt-4">
-                                    <h2 className="font-extrabold text-2xl text-brand-text">Top Play</h2>
+                                    <h2 className="font-extrabold text-xl sm:text-2xl text-brand-text">Top Play</h2>
                                     <button
                                         onClick={() => router.push('/songs/list/plays')}
                                         className="text-[10px] font-black tracking-widest uppercase text-brand-primary bg-brand-primary/10 px-2 py-1 rounded-full hover:bg-brand-primary hover:text-white transition-all"
@@ -345,8 +420,8 @@ export default function SongsPage() {
                             {/* Relax Mood */}
                             {relaxSongs.length > 0 && (
                                 <section>
-                                    <h2 className="font-extrabold text-2xl text-brand-text mb-4">Santai Dulu</h2>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <h2 className="font-extrabold text-xl sm:text-2xl text-brand-text mb-4">Santai Dulu</h2>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                         {relaxSongs.map((song) => (
                                             <div key={song.id} onClick={() => play(song, relaxSongs)} className="flex items-center gap-3 bg-blue-50/30 p-3 rounded-2xl cursor-pointer hover:bg-blue-50/50 transition-all hover:shadow-sm">
                                                 <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm">
@@ -365,8 +440,8 @@ export default function SongsPage() {
                             {/* Focus Mood */}
                             {focusSongs.length > 0 && (
                                 <section>
-                                    <h2 className="font-extrabold text-2xl text-brand-text mb-4">Teman Fokus</h2>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <h2 className="font-extrabold text-xl sm:text-2xl text-brand-text mb-4">Teman Fokus</h2>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                         {focusSongs.map((song) => (
                                             <div key={song.id} onClick={() => play(song, focusSongs)} className="flex items-center gap-3 bg-purple-50/30 p-3 rounded-2xl cursor-pointer hover:bg-purple-50/50 transition-all hover:shadow-sm">
                                                 <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm">
@@ -383,9 +458,9 @@ export default function SongsPage() {
                             )}
 
                             {/* Random Discovery */}
-                            <section className="bg-brand-primary/5 -mx-6 px-6 py-10 rounded-[3.5rem] mt-4 shadow-inner">
+                            <section className="bg-brand-primary/5 -mx-4 sm:-mx-6 px-4 sm:px-6 py-8 sm:py-10 rounded-[2.5rem] sm:rounded-[3.5rem] mt-4 shadow-inner">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="font-extrabold text-2xl text-brand-text">Surprize Me!</h2>
+                                    <h2 className="font-extrabold text-xl sm:text-2xl text-brand-text">Surprize Me!</h2>
                                     <svg className="w-6 h-6 text-brand-primary animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>

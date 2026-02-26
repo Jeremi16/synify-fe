@@ -6,13 +6,17 @@ import MiniPlayer from '@/components/MiniPlayer';
 import TopNav from '@/components/TopNav';
 
 export const metadata: Metadata = {
-    title: 'Spotify Clone',
+    title: 'Synify',
     description: 'Pemutar musik berbasis web — Progressive Web App',
     manifest: '/manifest.json',
+    icons: {
+        icon: '/icons/icon-512.png',
+        apple: '/icons/icon-192.png',
+    },
     appleWebApp: {
         capable: true,
         statusBarStyle: 'black-translucent',
-        title: 'Spotify Clone',
+        title: 'Synify',
     },
 };
 

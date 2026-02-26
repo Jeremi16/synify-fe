@@ -1,6 +1,6 @@
 {
-    "name": "Spotify Clone",
-    "short_name": "SpotifyClone",
+    "name": "Synify",
+    "short_name": "Synify",
     "description": "Pemutar musik berbasis web — Progressive Web App",
     "start_url": "/songs",
     "display": "standalone",

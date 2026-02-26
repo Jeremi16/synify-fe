@@ -66,7 +66,7 @@ const realApi = {
     },
 
     songs: {
-        list: (params?: { genre?: string; q?: string; sort?: string; mood?: string; limit?: number; offset?: number }) => {
+        list: (params?: { genre?: string; artist?: string; q?: string; sort?: string; mood?: string; limit?: number; offset?: number }) => {
             const qs = new URLSearchParams(
                 Object.entries(params || {})
                     .filter(([, v]) => v !== undefined)

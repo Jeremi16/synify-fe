@@ -20,7 +20,7 @@ export default function SongCard({ song, onPlay, onClick, onDownload }: SongCard
 
     return (
         <div
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer group
+            className={`flex items-center gap-3 px-2.5 sm:px-3 py-2.5 rounded-xl transition-all cursor-pointer group
         ${isActive ? 'bg-white shadow-md border-brand-accent/30' : 'bg-transparent hover:bg-white hover:shadow-sm'} border border-transparent`}
         >
             {/* Cover — clicking navigates to detail */}
@@ -46,15 +46,16 @@ export default function SongCard({ song, onPlay, onClick, onDownload }: SongCard
                 <p className="text-brand-muted font-medium text-sm truncate">
                     {song.artists?.map(a => a.name).join(', ') || 'Unknown Artist'}
                 </p>
+                <p className="text-brand-muted text-xs mt-0.5 sm:hidden">{song.duration}</p>
             </button>
 
             {/* Duration */}
-            <span className="text-brand-muted text-sm shrink-0">{song.duration}</span>
+            <span className="text-brand-muted text-sm shrink-0 hidden sm:inline">{song.duration}</span>
 
             {/* Add to Playlist Button */}
             <button
                 onClick={(e) => { e.stopPropagation(); setShowPlaylistModal(true); }}
-                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all 
+                className="w-10 h-10 rounded-full items-center justify-center shrink-0 transition-all hidden sm:flex
                          bg-gray-50 text-brand-muted hover:bg-gray-100 hover:text-brand-text opacity-0 group-hover:opacity-100"
                 aria-label="Tambah ke playlist"
             >
@@ -66,7 +67,7 @@ export default function SongCard({ song, onPlay, onClick, onDownload }: SongCard
             {onDownload && (
                 <button
                     onClick={(e) => { e.stopPropagation(); onDownload(); }}
-                    className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all 
+                    className="w-10 h-10 rounded-full items-center justify-center shrink-0 transition-all hidden sm:flex
                          bg-gray-50 text-brand-muted hover:bg-gray-100 hover:text-brand-text opacity-0 group-hover:opacity-100"
                     aria-label="Unduh untuk offline"
                 >
@@ -87,7 +88,7 @@ export default function SongCard({ song, onPlay, onClick, onDownload }: SongCard
                         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                     </svg>
                 ) : (
-                    <svg className="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z" />
                     </svg>
                 )}
