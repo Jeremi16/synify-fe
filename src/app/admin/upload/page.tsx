@@ -151,7 +151,58 @@ export default function AdminUploadPage() {
         try {
             // Use Spotify search as specifically requested
             const data = await api.songs.spotifySearch(searchQuery);
-            setSearchResults(data.videos);
+
+            const normalizeTitle = (value: string) =>
+                value
+                    .toLowerCase()
+                    .replace(/\(.*?\)/g, ' ')
+                    .replace(/\[.*?\]/g, ' ')
+                    .replace(/feat\.?|ft\.?/g, ' ')
+                    .replace(/[^a-z0-9]+/g, ' ')
+                    .trim();
+
+            const normalizeArtists = (value: string) => {
+                const raw = value
+                    .replace(/\(.*?\)/g, ' ')
+                    .replace(/\[.*?\]/g, ' ')
+                    .replace(/feat\.?|ft\.?/gi, ' ')
+                    .replace(/[^a-zA-Z0-9&xX, ]+/g, ' ');
+
+                const parts = raw
+                    .split(/,|&| x | X | and /g)
+                    .map((p) => normalizeTitle(p))
+                    .filter(Boolean)
+                    .sort();
+
+                return parts.join(' ');
+            };
+
+            const items = data.videos.map((video: any) => ({
+                title: video.title || '',
+                artists: [video.author || ''],
+            }));
+
+            const existsRes = await api.songs.exists(items);
+
+            const mapped = data.videos.map((video: any, idx: number) => {
+                const title = normalizeTitle(video.title || '');
+                const artists = normalizeArtists(video.author || '');
+                const key = `${title}|${artists}`;
+                return {
+                    ...video,
+                    _dedupeKey: key,
+                    existsInDb: Boolean(existsRes.results?.[idx]),
+                };
+            });
+
+            const dedupedMap = new Map<string, any>();
+            for (const item of mapped) {
+                if (!dedupedMap.has(item._dedupeKey)) {
+                    dedupedMap.set(item._dedupeKey, item);
+                }
+            }
+
+            setSearchResults(Array.from(dedupedMap.values()).map(({ _dedupeKey, ...rest }) => rest));
             setSelectedVideos([]);
         } catch (err: any) {
             setError(err.message || 'Gagal mencari di Spotify.');
@@ -474,10 +525,11 @@ export default function AdminUploadPage() {
                                             <div
                                                 key={video.videoId}
                                                 onClick={() => {
+                                                    if (video.existsInDb) return;
                                                     if (isSelected) setSelectedVideos(selectedVideos.filter(u => u !== video.url));
                                                     else setSelectedVideos([...selectedVideos, video.url]);
                                                 }}
-                                                className={`p-3 flex gap-3 items-center cursor-pointer transition-colors ${isSelected ? 'bg-brand-accent/5' : 'hover:bg-gray-50'}`}
+                                                className={`p-3 flex gap-3 items-center transition-colors ${video.existsInDb ? 'bg-gray-50 cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-gray-50'} ${isSelected ? 'bg-brand-accent/5' : ''}`}
                                             >
                                                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? 'bg-brand-primary border-brand-primary' : 'border-gray-300'}`}>
                                                     {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>}
@@ -488,6 +540,11 @@ export default function AdminUploadPage() {
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-sm text-brand-text font-bold truncate">{video.title}</p>
                                                     <p className="text-[10px] text-brand-muted font-medium truncate">{video.author} • {video.duration}</p>
+                                                    {video.existsInDb && (
+                                                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-widest text-brand-muted bg-gray-100 px-2 py-0.5 rounded-full">
+                                                            Sudah Ada
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         );

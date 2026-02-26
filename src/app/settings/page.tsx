@@ -15,6 +15,8 @@ export default function SettingsPage() {
     const router = useRouter();
     const [autoPlay, setAutoPlay] = useState(true);
     const [wifiOnly, setWifiOnly] = useState(false);
+    const [installPrompt, setInstallPrompt] = useState<any>(null);
+    const [isInstalled, setIsInstalled] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -28,6 +30,32 @@ export default function SettingsPage() {
         const storedWifi = localStorage.getItem(SETTINGS_KEYS.wifiOnly);
         if (storedAutoplay !== null) setAutoPlay(storedAutoplay === 'true');
         if (storedWifi !== null) setWifiOnly(storedWifi === 'true');
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handleBeforeInstall = (e: Event) => {
+            e.preventDefault();
+            setInstallPrompt(e);
+        };
+        const handleInstalled = () => {
+            setIsInstalled(true);
+            setInstallPrompt(null);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall as EventListener);
+        window.addEventListener('appinstalled', handleInstalled);
+
+        // detect installed (standalone)
+        const isStandalone =
+            window.matchMedia('(display-mode: standalone)').matches ||
+            (navigator as any).standalone === true;
+        if (isStandalone) setIsInstalled(true);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall as EventListener);
+            window.removeEventListener('appinstalled', handleInstalled);
+        };
     }, []);
 
     useEffect(() => {
@@ -116,6 +144,28 @@ export default function SettingsPage() {
                     <div>
                         <p className="text-xs font-black uppercase tracking-widest text-brand-muted/60 mb-3">Aplikasi</p>
                         <div className="space-y-3">
+                            <div className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl">
+                                <div>
+                                    <p className="text-sm font-bold text-brand-text">Install PWA</p>
+                                    <p className="text-xs text-brand-muted">Pasang Synify di perangkatmu</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    disabled={!installPrompt || isInstalled}
+                                    onClick={async () => {
+                                        if (!installPrompt) return;
+                                        const prompt = installPrompt as any;
+                                        await prompt.prompt();
+                                        await prompt.userChoice;
+                                        setInstallPrompt(null);
+                                    }}
+                                    className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all
+                                    ${isInstalled ? 'bg-gray-100 text-brand-muted' : 'bg-brand-primary text-white hover:bg-brand-primary/90'}
+                                    ${!installPrompt && !isInstalled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {isInstalled ? 'Terpasang' : 'Install'}
+                                </button>
+                            </div>
                             <div className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl">
                                 <div>
                                     <p className="text-sm font-bold text-brand-text">Bahasa</p>

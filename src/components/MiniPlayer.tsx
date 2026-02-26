@@ -53,9 +53,9 @@ export default function MiniPlayer() {
             >
                 <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl" />
 
-                <div className="relative h-full flex flex-col px-8 pt-16 pb-12 max-w-2xl mx-auto">
+                <div className="relative h-full flex flex-col px-8 pt-4 sm:pt-16 pb-12 max-w-2xl mx-auto">
                     {/* Top Bar */}
-                    <header className="flex items-center justify-between mb-10">
+                    <header className="flex items-center justify-between mb-8 sm:mb-10">
                         <button
                             onClick={() => setIsExpanded(false)}
                             className="p-3 bg-white/20 rounded-full hover:bg-white/40 transition-colors"
@@ -78,13 +78,31 @@ export default function MiniPlayer() {
                         </button>
                     </header>
 
-                    {/* Content Area - Lyrics Player */}
-                    <div className="flex-1 min-h-0">
-                        <LyricsPlayer
-                            lrc={currentSong.lyricsLrc || ''}
-                            currentTime={currentTime}
-                            themeColor={themeColor}
-                        />
+                    {/* Content Area - Lyrics / Cover */}
+                    <div className="flex-1 min-h-0 flex items-center justify-center">
+                        {currentSong.lyricsLrc && currentSong.lyricsLrc.trim().length > 0 ? (
+                            <LyricsPlayer
+                                lrc={currentSong.lyricsLrc}
+                                currentTime={currentTime}
+                                themeColor={themeColor}
+                            />
+                        ) : (
+                            <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-3xl bg-white/70 backdrop-blur border border-white/60 shadow-2xl overflow-hidden flex items-center justify-center">
+                                {currentSong.coverUrl ? (
+                                    <Image
+                                        src={currentSong.coverUrl}
+                                        alt={currentSong.title}
+                                        width={360}
+                                        height={360}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <svg className="w-16 h-16 text-brand-muted/60" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+                                    </svg>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Bottom Info & Controls */}
@@ -131,29 +149,29 @@ export default function MiniPlayer() {
                         </div>
 
                         {/* Main Controls */}
-                        <div className="flex items-center justify-between">
-                            <button onClick={toggleShuffle} className={`p-4 ${isShuffle ? 'text-brand-primary' : 'text-brand-muted hover:text-brand-text'}`}>
+                        <div className="flex items-center justify-center gap-3 sm:gap-4 px-2">
+                            <button onClick={toggleShuffle} className={`p-3 sm:p-4 ${isShuffle ? 'text-brand-primary' : 'text-brand-muted hover:text-brand-text'}`}>
                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
                                 </svg>
                             </button>
-                            <button onClick={prev} className="p-4 text-brand-text hover:scale-110 active:scale-95 transition-transform">
-                                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg>
+                            <button onClick={prev} className="p-3 sm:p-4 text-brand-text hover:scale-110 active:scale-95 transition-transform">
+                                <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg>
                             </button>
                             <button
                                 onClick={isPlaying ? pause : resume}
-                                className="w-24 h-24 shrink-0 rounded-full flex items-center justify-center shadow-xl shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-transform bg-brand-primary text-white"
+                                className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full flex items-center justify-center shadow-xl shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-transform bg-brand-primary text-white"
                             >
                                 {isPlaying ? (
-                                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                                    <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
                                 ) : (
-                                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                 )}
                             </button>
-                            <button onClick={next} className="p-4 text-brand-text hover:scale-110 active:scale-95 transition-transform">
-                                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" /></svg>
+                            <button onClick={next} className="p-3 sm:p-4 text-brand-text hover:scale-110 active:scale-95 transition-transform">
+                                <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" /></svg>
                             </button>
-                            <button onClick={() => setShowPlaylistModal(true)} className="p-4 text-brand-muted hover:text-brand-text">
+                            <button onClick={() => setShowPlaylistModal(true)} className="p-3 sm:p-4 text-brand-muted hover:text-brand-text">
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>

@@ -86,6 +86,11 @@ const realApi = {
             apiFetch<{ items: Array<{ song: Song; url: string; expiresIn: number }> }>(
                 `/songs/download?ids=${encodeURIComponent(ids.join(','))}`
             ),
+        exists: (items: Array<{ title: string; artists: string[] }>) =>
+            apiFetch<{ results: boolean[] }>('/songs/exists', {
+                method: 'POST',
+                body: JSON.stringify({ items }),
+            }),
 
         // ADMIN ONLY
         ytSearch: (q: string) =>
