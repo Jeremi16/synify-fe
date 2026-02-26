@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-bg: #F4F6F9;
+  --brand-surface: #FFFFFF;
+  --brand-text: #111827;
+  --brand-primary: #1A1D29;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: 'Inter', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
+
+/* Utility classes */
+@layer components {
+  .btn-primary {
+    @apply bg-brand-primary text-white font-semibold px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer shadow-md;
+  }
+
+  .card {
+    @apply bg-brand-surface rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer border border-gray-100;
+  }
+
+  .text-muted {
+    @apply text-brand-muted text-sm font-medium;
+  }
+}
