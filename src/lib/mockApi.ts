@@ -167,6 +167,9 @@ export const mockApi = {
         spotifySearch: async () => ({ videos: [] } as YTSearchResponse),
         spotifyPreview: async () => ({ rawTitle: '', title: '', artists: [], thumbnail: '', duration: '' } as YTPreviewResponse),
         spotifyDownload: async () => ({ song: mockSongs[0] }),
+        exists: async (items: Array<{ title: string; artists: string[] }>) => ({
+            results: items.map(() => false),
+        }),
         getUploadUrl: async () => ({ uploadUrl: '', objectKey: '', publicUrl: null, expiresIn: 3600 }),
         create: async (data: any) => ({ song: { ...mockSongs[0], ...data } }),
     },
